@@ -1,18 +1,76 @@
 import express from 'express';
 import Products from '../models/Products.js';
+import { v2 as cloudinary } from 'cloudinary';
 
 const router = express.Router();
 
-// Post Product-----------------------------
+// Cloudinary Config----------------------------
 
-router.post('/', async (req, res, next) => {
-  const newProduct = new Products(req.body);
-  console.log(newProduct);
+cloudinary.config({
+  cloud_name: 'dx30ulg0o',
+  api_key: '271179376229133',
+  api_secret: 'AlpF9xejPJQNoH7ftKKOmWDhcFI',
+});
+
+// post product-----------------
+
+router.post('/upload', async (req, res) => {
   try {
+    const {
+      title,
+      short_description,
+      long_description,
+      regular_price,
+      sell_price,
+      sku,
+      p_size,
+      p_color,
+      category,
+      sub_category,
+      product_type,
+      image,
+      total_stocks,
+      product_rating,
+    } = req.body;
+
+    // Check if image is an array
+    const imageArray = Array.from(image);
+
+    const uploadedImages = [];
+    // Loop through each image in the array
+    for (const file of imageArray) {
+      console.log(file);
+      const result = await cloudinary.uploader.upload(file.path);
+      console.log(result);
+      const imageUrl = result.secure_url;
+      uploadedImages.push(imageUrl);
+    }
+
+    // Create a new product object with the details and uploaded image URLs
+    const newProduct = new Products({
+      title,
+      short_description,
+      long_description,
+      regular_price,
+      sell_price,
+      sku,
+      p_size,
+      p_color,
+      category,
+      sub_category,
+      product_type,
+      image: uploadedImages,
+      total_stocks,
+      product_rating,
+    });
+
+    // Save the new product to MongoDB
     const savedProduct = await newProduct.save();
-    res.status(200).json(savedProduct);
-  } catch (err) {
-    next(err);
+
+    return res.status(200).json(savedProduct);
+  } catch (error) {
+    console.error('Error uploading product to Cloudinary:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 });
 
@@ -22,7 +80,7 @@ router.get('/featured', async (req, res, next) => {
   const filter = { product_type: { $in: ['Featured'] } };
   try {
     const products = await Products.find(filter);
-    console.log(products);
+
     res.status(200).json(products);
   } catch (err) {
     next(err);
@@ -34,7 +92,7 @@ router.get('/new-collection', async (req, res, next) => {
   const filter = { product_type: { $in: ['New Collections'] } };
   try {
     const products = await Products.find(filter);
-    console.log(products);
+
     res.status(200).json(products);
   } catch (err) {
     next(err);
@@ -46,7 +104,7 @@ router.get('/trending', async (req, res, next) => {
   const filter = { product_type: { $in: ['Trending'] } };
   try {
     const products = await Products.find(filter);
-    console.log(products);
+
     res.status(200).json(products);
   } catch (err) {
     next(err);
@@ -58,14 +116,14 @@ router.get('/weekly-best', async (req, res, next) => {
   const filter = { product_type: { $in: ['Weekly Best'] } };
   try {
     const products = await Products.find(filter);
-    console.log(products);
+
     res.status(200).json(products);
   } catch (err) {
     next(err);
   }
 });
 
-// Find All Product-----------------------------
+// Find All Orders-----------------------------
 
 router.get('/all', async (req, res, next) => {
   try {

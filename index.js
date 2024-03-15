@@ -4,7 +4,11 @@ import cors from 'cors';
 import morgan from 'morgan';
 import connectDB from './connection/connection.js';
 import productRoute from './routes/products.js';
+import userRoute from './routes/userRoute.js';
+// import fileUpload from 'express-fileupload';
+
 const app = express();
+
 const port = process.env.PORT || 1010;
 dotenv.config();
 
@@ -12,12 +16,21 @@ dotenv.config();
 
 connectDB();
 
+// Allow temporery file upload....
+
+// app.use(
+//   fileUpload({
+//     useTempFiles: true,
+//   })
+// );
+
 // Middleware------------------------
 
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 app.use('/products', productRoute);
+app.use('/user', userRoute);
 
 // Error Handling--------------------------
 

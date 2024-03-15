@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-
+import express from 'express';
 const ProductSchema = new mongoose.Schema(
   {
     title: String,
@@ -13,7 +13,7 @@ const ProductSchema = new mongoose.Schema(
     category: [String],
     sub_category: [String],
     product_type: [String],
-    image: { String },
+    image: [String],
     total_stocks: Number,
     product_rating: Array,
   },

@@ -13,7 +13,7 @@ const ProductSchema = new mongoose.Schema(
     category: [String],
     sub_category: [String],
     product_type: [String],
-    image: [String],
+    image: [],
     total_stocks: Number,
     product_rating: Array,
   },

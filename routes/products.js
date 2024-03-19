@@ -15,75 +15,81 @@ cloudinary.config({
 // post product-----------------
 
 router.post('/upload', async (req, res, next) => {
-  console.log('body', req.body);
-  console.log('files', req.files);
-  res.json({ success: true });
+  try {
+    const {
+      title,
+      short_description,
+      long_description,
+      regular_price,
+      sell_price,
+      sku,
+      p_size,
+      p_color,
+      category,
+      sub_category,
+      product_type,
+      total_stocks,
+      product_rating,
+    } = req.body;
+
+    const files = req.files; // Assuming files are directly available in req.files
+    console.log(files);
+
+    if (!files || !files.image) {
+      return res.status(400).json({ message: 'No files uploaded' });
+    }
+
+    const uploadedImages = [];
+
+    // If only one file is uploaded, it's not an array
+    if (!Array.isArray(files.image)) {
+      files.image = [files.image];
+    }
+
+    for (const file of files.image) {
+      // Convert Buffer data to base64-encoded string
+      const base64Data = file.data.toString('base64');
+
+      // Upload base64-encoded string to Cloudinary
+      const result = await cloudinary.uploader.upload(
+        'data:image/jpeg;base64,' + base64Data,
+        {
+          resource_type: 'image',
+        }
+      );
+
+      const imageUrl = result.secure_url;
+      uploadedImages.push(imageUrl);
+    }
+
+    // Create a new product object with the details and uploaded image URLs
+    const newProduct = new Products({
+      title,
+      short_description,
+      long_description,
+      regular_price,
+      sell_price,
+      sku,
+      p_size,
+      p_color,
+      category,
+      sub_category,
+      product_type,
+      image: uploadedImages,
+      total_stocks,
+      product_rating,
+    });
+
+    // Save the new product to MongoDB
+    const savedProduct = await newProduct.save();
+    console.log(savedProduct);
+
+    return res.status(200).json(savedProduct);
+  } catch (error) {
+    console.error('Error uploading product to Cloudinary:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
 });
-
-// router.post('/upload', async (req, res, next) => {
-//   try {
-//     const {
-//       title,
-//       short_description,
-//       long_description,
-//       regular_price,
-//       sell_price,
-//       sku,
-//       p_size,
-//       p_color,
-//       category,
-//       sub_category,
-//       product_type,
-//       image,
-//       total_stocks,
-//       product_rating,
-//     } = req.body;
-
-//     // Check if image is an array
-//     const files = req.files; // Assuming files are directly available in req.files
-//     console.log(files);
-//     if (!files || !files.image) {
-//       return res.status(400).json({ message: 'No files uploaded' });
-//     }
-
-//     const uploadedImages = [];
-//     for (const file of files.image) {
-//       const result = await cloudinary.uploader.upload(file.path);
-
-//       const imageUrl = result.secure_url;
-//       uploadedImages.push(imageUrl);
-//     }
-
-//     // Create a new product object with the details and uploaded image URLs
-//     const newProduct = new Products({
-//       title,
-//       short_description,
-//       long_description,
-//       regular_price,
-//       sell_price,
-//       sku,
-//       p_size,
-//       p_color,
-//       category,
-//       sub_category,
-//       product_type,
-//       image: uploadedImages,
-//       total_stocks,
-//       product_rating,
-//     });
-
-//     // Save the new product to MongoDB
-//     const savedProduct = await newProduct.save();
-//     console.log(savedProduct);
-
-//     return res.status(200).json(savedProduct);
-//   } catch (error) {
-//     console.error('Error uploading product to Cloudinary:', error);
-//     return res.status(500).json({ message: 'Internal server error' });
-//   }
-// });
-
-// Find Featured Products-------------------
 
 router.get('/featured', async (req, res, next) => {
   const filter = { product_type: { $in: ['Featured'] } };

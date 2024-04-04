@@ -8,8 +8,13 @@ const OrdersSchema = new mongoose.Schema({
   country: String,
   street_address: String,
   delivery_time: String,
-  ordered_prducts: Array,
+  ordered_prducts: [{ type: mongoose.Types.ObjectId, ref: 'Products' }],
   orderId: String,
-  user: Array,
+  user: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: 'Users',
+    },
+  ],
 });
 export default mongoose.model('Orders', OrdersSchema);

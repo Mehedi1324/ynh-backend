@@ -6,7 +6,6 @@ import connectDB from './connection/connection.js';
 import productRoute from './routes/products.js';
 import userRoute from './routes/userRoute.js';
 import fileUpload from 'express-fileupload';
-
 const app = express();
 
 const port = process.env.PORT || 1010;

@@ -13,3 +13,5 @@ const checkLogin = (req, res, next) => {
     next(err);
   }
 };
+
+export default checkLogin;

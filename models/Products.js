@@ -9,6 +9,7 @@ const ProductSchema = new mongoose.Schema(
     sell_price: String,
     sku: String,
     p_size: [String],
+    company: String,
     p_color: [String],
     category: [String],
     sub_category: [String],
